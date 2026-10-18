@@ -25,6 +25,12 @@ python -m pip install -e '.[test]'
 injection-lab --system-prompt-file examples/system_prompt.txt --provider mock
 ```
 
+That prints a report like this (a real run of the command above):
+
+![Console output of an offline mock run: three fixtures pass, with a warning that the system prompt was not tested](docs/run-output.png)
+
+The mock ignores your prompt, so a pass here only shows that the runner and report path work.
+
 Run the unit tests and smoke check with:
 
 ```bash
