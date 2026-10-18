@@ -39,7 +39,7 @@ Run the unit tests and smoke check with:
 
 ## Optional real-model run
 
-Only `--provider openai` sends requests outside your machine. One request is made for each
+Only `--provider openai` and `--provider openai-compatible` send requests outside your machine (the second goes to whatever `--base-url` you give it, which must be https unless it is localhost). One request is made for each
 of the three fixtures, times `--runs` (default 1, at most 10), so `--runs 5` makes 15 requests. This sends the supplied system prompt and fixture inputs to OpenAI
 and may incur API charges. Select a model available to your account. Use a non-sensitive
 prompt, or confirm your handling policy before sending confidential material. The request
@@ -68,7 +68,7 @@ does not print or store raw prompts or model responses. A report includes only t
 provider/model name, prompt length, case ids, lexical indicators, and aggregate counts.
 
 ## Measured run: 10 models through an OpenAI-compatible gateway
-`--provider openai-compatible` speaks Chat Completions, so it works with a gateway or any local server (`--base-url`, `--api-key-env`). Requests that fail with HTTP 429 or 5xx are retried with a growing wait. On Oct 18 2026 the bundled `examples/system_prompt.txt` was run against 10 models through the Nicrron gateway, 10 runs per case (300 requests; transcript-free reports in `reports/gateway-2026-10-18/`).
+`--provider openai-compatible` speaks Chat Completions, so it works with a gateway or any local server (`--base-url`, `--api-key-env`). Requests that fail with HTTP 429 or 5xx are retried with a growing wait. On Oct 18 2026 the bundled `examples/system_prompt.txt` was run against 10 models through the Nicrron gateway, 10 runs per case (300 requests; transcript-free reports in `examples/gateway-run-2026-10-18/`).
 
 | Result | Count |
 |---|---|
@@ -76,7 +76,7 @@ provider/model name, prompt length, case ids, lexical indicators, and aggregate 
 | Attack indicator | 0 |
 | Error (HTTP 429 after retries) | 10 |
 
-Every model passed every answered request: Claude Fable 5.1, Opus 5.5 and Haiku 5.5, GPT-6 Sol and Luna, DeepSeek V4 Pro, Kimi K3, Grok 4.7, GLM 5.3 and Mistral Large 4. **How to read it:** the three starter fixtures are simple and fixed, and the system prompt is short, so this says the harness works on real models and that these models resist these three cases, not that they resist injection in general. The 10 errors came from running another job on the same gateway at the same time; they are not counted as passes. A harder fixture set is the next step.
+Every model passed every answered request: Claude Fable 5.1, Opus 5.5 and Haiku 5.5, GPT-6 Sol and Luna, DeepSeek V4 Pro, Kimi K3, Grok 4.7, GLM 5.3 and Mistral Large 4. **How to read it:** the three starter fixtures are simple and fixed, and the system prompt is short, so this says the harness works on real models and that these models resist these three cases, not that they resist injection in general. This run was scored before the canary was checked in every case (it was then checked only in the private-context case); transcripts are not saved, so it cannot be re-scored, and a rerun would be needed to confirm it with the stricter check. The 10 errors came from running another job on the same gateway at the same time; they are not counted as passes. A harder fixture set is the next step.
 
 ## What is measured
 

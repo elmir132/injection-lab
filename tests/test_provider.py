@@ -153,3 +153,11 @@ def test_compatible_provider_does_not_retry_client_errors(monkeypatch):
     with pytest.raises(ProviderError):
         OpenAICompatibleProvider(api_key="k", model="m", base_url="https://x/v1").complete("s", "u")
     assert calls["n"] == 1
+
+
+def test_compatible_provider_refuses_plain_http_to_a_remote_host_but_allows_localhost(monkeypatch):
+    monkeypatch.setenv("SOME_KEY", "k")
+    with pytest.raises(ProviderError) as caught:
+        make_provider("openai-compatible", "m", base_url="http://gateway.example/v1", api_key_env="SOME_KEY")
+    assert str(caught.value) == "insecure_base_url"
+    assert make_provider("openai-compatible", "m", base_url="http://localhost:11434/v1", api_key_env="SOME_KEY").model == "m"

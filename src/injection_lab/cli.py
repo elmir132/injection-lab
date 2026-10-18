@@ -56,6 +56,8 @@ def main(argv: list[str] | None = None) -> int:
         message = (
             "set --base-url for --provider openai-compatible"
             if exc.code == "missing_base_url"
+            else "--base-url must be https:// (plain http is allowed only for localhost)"
+            if exc.code == "insecure_base_url"
             else "the API key environment variable is not set (see --api-key-env)"
             if exc.code == "missing_api_key"
             else "OPENAI_API_KEY is required for --provider openai"

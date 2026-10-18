@@ -8,6 +8,7 @@ import time
 from dataclasses import dataclass
 from typing import Protocol
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 
@@ -174,6 +175,9 @@ def make_provider(provider_name: str, model: str | None, max_output_tokens: int 
     if provider_name == "openai-compatible":
         if not base_url:
             raise ProviderError("missing_base_url")
+        host = (urlparse(base_url).hostname or "").lower()
+        if not base_url.lower().startswith("https://") and host not in ("localhost", "127.0.0.1", "::1"):
+            raise ProviderError("insecure_base_url")      # never send an API key over plain http to a remote host
         api_key = os.environ.get(api_key_env, "").strip()
         if not api_key:
             raise ProviderError("missing_api_key")
