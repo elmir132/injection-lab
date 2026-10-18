@@ -18,8 +18,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"injection-lab {__version__}")
     parser.add_argument("--system-prompt-file", required=True, type=Path)
-    parser.add_argument("--provider", choices=("mock", "openai"), default="mock")
-    parser.add_argument("--model", help="Model name for --provider openai")
+    parser.add_argument("--provider", choices=("mock", "openai", "openai-compatible"), default="mock")
+    parser.add_argument("--model", help="Model name for a real provider")
+    parser.add_argument("--base-url", help="Base URL for --provider openai-compatible, e.g. https://host/v1 (Chat Completions)")
+    parser.add_argument("--api-key-env", default="OPENAI_API_KEY", metavar="NAME",
+                        help="Name of the environment variable holding the key for --provider openai-compatible (default OPENAI_API_KEY)")
     parser.add_argument("--runs", type=int, default=1, choices=range(1, 11), metavar="N",
                         help="Run each case N times (1 to 10, default 1). A real run makes 3 x N requests.")
     parser.add_argument("--max-output-tokens", type=int, default=1000, metavar="N",
@@ -40,19 +43,24 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     try:
-        provider = make_provider(args.provider, args.model, args.max_output_tokens)
-        if args.provider == "openai":
+        provider = make_provider(args.provider, args.model, args.max_output_tokens, args.base_url, args.api_key_env)
+        if args.provider != "mock":
+            target = "OpenAI" if args.provider == "openai" else args.base_url
             print(
-                f"Note: this run sends the prompt and synthetic attack fixtures to OpenAI ({3 * args.runs} requests); "
+                f"Note: this run sends the prompt and synthetic attack fixtures to {target} ({3 * args.runs} requests); "
                 "provider usage may incur charges.",
                 file=sys.stderr,
             )
         report = evaluate(prompt, provider, args.runs)
     except ProviderError as exc:
         message = (
-            "OPENAI_API_KEY is required for --provider openai"
+            "set --base-url for --provider openai-compatible"
+            if exc.code == "missing_base_url"
+            else "the API key environment variable is not set (see --api-key-env)"
+            if exc.code == "missing_api_key"
+            else "OPENAI_API_KEY is required for --provider openai"
             if exc.code == "missing_openai_api_key"
-            else "--model or INJECTION_LAB_MODEL is required for --provider openai"
+            else "--model or INJECTION_LAB_MODEL is required for a real provider"
             if exc.code == "missing_model"
             else f"provider setup failed ({exc.code})"
         )

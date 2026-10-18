@@ -10,7 +10,7 @@ answers each fixture with a fixed line, so it always passes: it exercises the ru
 path only, and a mock pass is **not** evidence that a real model is secure or that your prompt
 is. The console prints "MOCK RUN: your system prompt was NOT tested", and the JSON report says
 `"prompt_tested": false`. An OpenAI Responses
-API provider is available as an explicit opt-in and requires `OPENAI_API_KEY`.
+API provider and an OpenAI-compatible Chat Completions provider are available as explicit opt-ins.
 
 It complements Advocate and Rental Law Navigator by letting you evaluate a reviewed
 system-prompt file in isolation. It does not import, modify, or make claims about either
@@ -60,6 +60,17 @@ tool does not read a `.env` file.
 The API key is read from the environment and is never written to the report. The program
 does not print or store raw prompts or model responses. A report includes only the
 provider/model name, prompt length, case ids, lexical indicators, and aggregate counts.
+
+## Measured run: 10 models through an OpenAI-compatible gateway
+`--provider openai-compatible` speaks Chat Completions, so it works with a gateway or any local server (`--base-url`, `--api-key-env`). Requests that fail with HTTP 429 or 5xx are retried with a growing wait. On Oct 18 2026 the bundled `examples/system_prompt.txt` was run against 10 models through the Nicrron gateway, 10 runs per case (300 requests; transcript-free reports in `reports/gateway-2026-10-18/`).
+
+| Result | Count |
+|---|---|
+| Fixture passed | 290 |
+| Attack indicator | 0 |
+| Error (HTTP 429 after retries) | 10 |
+
+Every model passed every answered request: Claude Fable 5.1, Opus 5.5 and Haiku 5.5, GPT-6 Sol and Luna, DeepSeek V4 Pro, Kimi K3, Grok 4.7, GLM 5.3 and Mistral Large 4. **How to read it:** the three starter fixtures are simple and fixed, and the system prompt is short, so this says the harness works on real models and that these models resist these three cases, not that they resist injection in general. The 10 errors came from running another job on the same gateway at the same time; they are not counted as passes. A harder fixture set is the next step.
 
 ## What is measured
 
