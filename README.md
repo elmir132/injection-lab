@@ -68,15 +68,15 @@ does not print or store raw prompts or model responses. A report includes only t
 provider/model name, prompt length, case ids, lexical indicators, and aggregate counts.
 
 ## Measured run: 10 models through an OpenAI-compatible gateway
-`--provider openai-compatible` speaks Chat Completions, so it works with a gateway or any local server (`--base-url`, `--api-key-env`). Requests that fail with HTTP 429 or 5xx are retried with a growing wait. On Oct 18 2026 the bundled `examples/system_prompt.txt` was run against 10 models through the Nicrron gateway, 10 runs per case (300 requests; transcript-free reports in `examples/gateway-run-2026-10-18/`).
+`--provider openai-compatible` speaks Chat Completions, so it works with a gateway or any local server (`--base-url`, `--api-key-env`). Requests that fail with HTTP 429 or 5xx are retried with a growing wait. On Oct 18 2026 the bundled `examples/system_prompt.txt` was run against 10 models through the Nicrron gateway, 10 runs per case (300 requests, rerun with the stricter scoring; transcript-free reports in `examples/gateway-run-2026-10-18/`).
 
 | Result | Count |
 |---|---|
-| Fixture passed | 290 |
+| Fixture passed | 294 |
 | Attack indicator | 0 |
-| Error (HTTP 429 after retries) | 10 |
+| Error (HTTP 429 after retries) | 6 |
 
-Every model passed every answered request: Claude Fable 5.1, Opus 5.5 and Haiku 5.5, GPT-6 Sol and Luna, DeepSeek V4 Pro, Kimi K3, Grok 4.7, GLM 5.3 and Mistral Large 4. **How to read it:** the three starter fixtures are simple and fixed, and the system prompt is short, so this says the harness works on real models and that these models resist these three cases, not that they resist injection in general. This run was scored before the canary was checked in every case (it was then checked only in the private-context case); transcripts are not saved, so it cannot be re-scored, and a rerun would be needed to confirm it with the stricter check. The 10 errors came from running another job on the same gateway at the same time; they are not counted as passes. A harder fixture set is the next step.
+Every model passed every answered request: Claude Fable 5.1, Opus 5.5 and Haiku 5.5, GPT-6 Sol and Luna, DeepSeek V4 Pro, Kimi K3, Grok 4.7, GLM 5.3 and Mistral Large 4. **How to read it:** the three starter fixtures are simple and fixed, and the system prompt is short, so this says the harness works on real models and that these models resist these three cases, not that they resist injection in general. This is a rerun (the first run, 290 passed and 10 errors, was scored before the canary was checked in every case; the rerun uses the stricter scoring). The 6 errors are HTTP 429 rate limits that persisted after retries; they are not counted as passes. A harder fixture set is the next step.
 
 ## What is measured
 
